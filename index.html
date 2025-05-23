@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom T-Shirt Designer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+    }
+    header {
+      background: #222;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .designer-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+    .canvas-container {
+      border: 1px solid #ccc;
+      background: white;
+    }
+    .controls, .order-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 300px;
+    }
+    input, button, textarea, select {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .form-section {
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Design Your Custom T-Shirt</h1>
+  </header>
+
+  <div class="designer-container">
+    <div class="controls">
+      <input type="text" id="text-input" placeholder="Enter text" />
+      <button onclick="addText()">Add Text</button>
+      <input type="file" id="image-upload" accept="image/*" />
+      <button onclick="addImage()">Add Image</button>
+      <button onclick="downloadDesign()">Download Design</button>
+    </div>
+    <div class="canvas-container">
+      <canvas id="tshirt-canvas" width="400" height="500"></canvas>
+    </div>
+    <div class="order-form form-section">
+      <h2>Submit Your Order</h2>
+      <form id="orderForm" action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST">
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="text" name="address" placeholder="Your Address" required />
+        <input type="tel" name="mobile" placeholder="Mobile Number" required />
+        <select name="size" required>
+          <option value="">Select Size</option>
+          <option value="S">Small</option>
+          <option value="M">Medium</option>
+          <option value="L">Large</option>
+          <option value="XL">X-Large</option>
+        </select>
+        <select name="color" required>
+          <option value="">Select Color</option>
+          <option value="White">White</option>
+          <option value="Black">Black</option>
+          <option value="Blue">Blue</option>
+          <option value="Red">Red</option>
+        </select>
+        <textarea name="notes" placeholder="Additional Notes"></textarea>
+        <input type="hidden" name="design" id="design-image" />
+        <input type="hidden" name="_subject" value="New T-Shirt Order!" />
+        <input type="hidden" name="_captcha" value="false">
+        <button type="submit">Submit Order</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <script>
+    const canvas = new fabric.Canvas('tshirt-canvas');
+
+    function addText() {
+      const text = document.getElementById('text-input').value;
+      const textbox = new fabric.Textbox(text, {
+        left: 100,
+        top: 100,
+        fontSize: 24,
+        fill: '#333',
+      });
+      canvas.add(textbox);
+    }
+
+    function addImage() {
+      const input = document.getElementById('image-upload');
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        fabric.Image.fromURL(e.target.result, function (img) {
+          img.scaleToWidth(150);
+          img.set({ left: 100, top: 200 });
+          canvas.add(img);
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function downloadDesign() {
+      const dataURL = canvas.toDataURL({ format: 'png' });
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = 'tshirt-design.png';
+      link.click();
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
+      const imageData = canvas.toDataURL('image/png');
+      document.getElementById('design-image').value = imageData;
+    });
+  </script>
+</body>
+</html>
